@@ -1,0 +1,684 @@
+/*
+ * Ardyn SDR Voice Widget — Complete Styles
+ *
+ * All classes prefixed with `avw-` to avoid conflicts with host page.
+ * Dark theme by default; light theme available via .avw-theme-light.
+ */
+
+/* ─── CSS Variables ──────────────────────────────────────────── */
+.avw-widget-container {
+  --avw-brand: #6366f1;
+  --avw-brand-rgb: 99, 102, 241;
+  --avw-button-size: 56px;
+
+  /* Dark theme (default) */
+  --avw-bg-primary: #0f0f13;
+  --avw-bg-secondary: #1a1a24;
+  --avw-bg-tertiary: #252534;
+  --avw-bg-hover: #2d2d40;
+  --avw-border: #2a2a3c;
+  --avw-text-primary: #f4f4f9;
+  --avw-text-secondary: #a1a1b8;
+  --avw-text-muted: #6b6b80;
+  --avw-danger: #ef4444;
+  --avw-success: #22c55e;
+  --avw-warning: #f59e0b;
+  --avw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --avw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.5);
+  --avw-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.6);
+  --avw-radius-sm: 8px;
+  --avw-radius-md: 12px;
+  --avw-radius-lg: 16px;
+  --avw-radius-full: 9999px;
+  --avw-transition: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Reset */
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: 14px;
+  line-height: 1.5;
+  color: var(--avw-text-primary);
+  box-sizing: border-box;
+
+  position: fixed;
+  z-index: 99990;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 12px;
+}
+
+.avw-widget-container *,
+.avw-widget-container *::before,
+.avw-widget-container *::after {
+  box-sizing: border-box;
+}
+
+/* Light theme override */
+.avw-theme-light,
+.avw-widget-container[data-theme="light"] {
+  --avw-bg-primary: #ffffff;
+  --avw-bg-secondary: #f8f8fc;
+  --avw-bg-tertiary: #eeeef4;
+  --avw-bg-hover: #e4e4ee;
+  --avw-border: #d4d4e0;
+  --avw-text-primary: #1a1a2e;
+  --avw-text-secondary: #5b5b78;
+  --avw-text-muted: #9494a8;
+  --avw-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.06);
+  --avw-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --avw-shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+}
+
+/* ─── Positioning ─────────────────────────────────────────────── */
+.avw-position-bottom-right { bottom: 24px; right: 24px; }
+.avw-position-bottom-left  { bottom: 24px; left: 24px; align-items: flex-start; }
+.avw-position-top-right    { top: 24px; right: 24px; }
+.avw-position-top-left     { top: 24px; left: 24px; align-items: flex-start; }
+
+/* ─── Voice Button ────────────────────────────────────────────── */
+.avw-voice-button {
+  position: relative;
+  width: var(--avw-button-size);
+  height: var(--avw-button-size);
+  border-radius: var(--avw-radius-full);
+  border: none;
+  background: var(--avw-brand);
+  color: #ffffff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: var(--avw-shadow-md);
+  transition: transform var(--avw-transition), box-shadow var(--avw-transition);
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  flex-shrink: 0;
+}
+
+.avw-voice-button:hover {
+  transform: scale(1.05);
+  box-shadow: var(--avw-shadow-lg);
+}
+
+.avw-voice-button:active {
+  transform: scale(0.95);
+  transition: transform 100ms ease;
+}
+
+/* State-specific button colors */
+.avw-voice-button.avw-state-listening {
+  background: var(--avw-success);
+  box-shadow: 0 0 20px rgba(34, 197, 94, 0.4), var(--avw-shadow-md);
+}
+
+.avw-voice-button.avw-state-speaking {
+  background: var(--avw-brand);
+  box-shadow: 0 0 24px rgba(var(--avw-brand-rgb), 0.5), var(--avw-shadow-md);
+}
+
+.avw-voice-button.avw-state-connecting {
+  background: var(--avw-warning);
+}
+
+.avw-voice-button.avw-state-processing {
+  background: #8b5cf6;
+}
+
+.avw-voice-button.avw-state-error {
+  background: var(--avw-danger);
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.4), var(--avw-shadow-md);
+  animation: avw-error-shake 0.5s ease;
+}
+
+.avw-voice-button.avw-open {
+  background: var(--avw-bg-secondary);
+  color: var(--avw-text-secondary);
+  border: 1px solid var(--avw-border);
+  box-shadow: var(--avw-shadow-sm);
+}
+
+/* Pulse ring */
+.avw-pulse-ring {
+  position: absolute;
+  inset: -6px;
+  border-radius: var(--avw-radius-full);
+  border: 2px solid currentColor;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.avw-state-listening .avw-pulse-ring {
+  animation: avw-pulse 1.8s ease-out infinite;
+  opacity: 0.3;
+}
+
+.avw-state-speaking .avw-pulse-ring {
+  animation: avw-pulse 0.8s ease-out infinite;
+  opacity: 0.4;
+}
+
+.avw-state-connecting .avw-pulse-ring {
+  animation: avw-pulse 1.2s ease-out infinite;
+  opacity: 0.3;
+}
+
+/* Button icon */
+.avw-button-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+}
+
+/* Tooltip */
+.avw-button-tooltip {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  background: var(--avw-bg-primary);
+  color: var(--avw-text-primary);
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: var(--avw-radius-sm);
+  border: 1px solid var(--avw-border);
+  box-shadow: var(--avw-shadow-md);
+  white-space: nowrap;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 150ms ease, transform 150ms ease;
+  pointer-events: none;
+}
+
+.avw-voice-button:hover .avw-button-tooltip {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ─── Animations ──────────────────────────────────────────────── */
+@keyframes avw-pulse {
+  0% {
+    transform: scale(calc(var(--avw-pulse-scale, 1)));
+    opacity: 0.4;
+  }
+  100% {
+    transform: scale(calc(var(--avw-pulse-scale, 1) + 0.3));
+    opacity: 0;
+  }
+}
+
+@keyframes avw-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes avw-error-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-4px); }
+  40% { transform: translateX(4px); }
+  60% { transform: translateX(-2px); }
+  80% { transform: translateX(2px); }
+}
+
+@keyframes avw-typing-bounce {
+  0%, 60%, 100% { transform: translateY(0); }
+  30% { transform: translateY(-6px); }
+}
+
+.avw-spin {
+  animation: avw-spin 1s linear infinite;
+}
+
+/* Three dots (processing) */
+.avw-dots {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+  justify-content: center;
+}
+
+.avw-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: avw-typing-bounce 1.2s ease-in-out infinite;
+}
+
+.avw-dot:nth-child(2) { animation-delay: 0.15s; }
+.avw-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Speaker rings */
+.avw-speaker-ring-1,
+.avw-speaker-ring-2 {
+  opacity: 0;
+  animation: avw-speaker-fade 1.5s ease-in-out infinite;
+}
+
+.avw-speaker-ring-2 { animation-delay: 0.5s; }
+
+@keyframes avw-speaker-fade {
+  0%, 100% { opacity: 0; }
+  50% { opacity: 1; }
+}
+
+/* ─── Chat Panel ──────────────────────────────────────────────── */
+.avw-chat-panel {
+  width: 360px;
+  max-height: 520px;
+  background: var(--avw-bg-primary);
+  border: 1px solid var(--avw-border);
+  border-radius: var(--avw-radius-lg);
+  box-shadow: var(--avw-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: avw-panel-in 250ms cubic-bezier(0.16, 1, 0.3, 1);
+  transform-origin: bottom right;
+}
+
+.avw-position-bottom-left .avw-chat-panel { transform-origin: bottom left; }
+.avw-position-top-right .avw-chat-panel { transform-origin: top right; }
+.avw-position-top-left .avw-chat-panel { transform-origin: top left; }
+
+@keyframes avw-panel-in {
+  from {
+    opacity: 0;
+    transform: scale(0.95) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* Header */
+.avw-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--avw-border);
+  background: var(--avw-bg-secondary);
+  flex-shrink: 0;
+}
+
+.avw-chat-header-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avw-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: var(--avw-radius-sm);
+  object-fit: cover;
+}
+
+.avw-avatar-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.avw-chat-title {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--avw-text-primary);
+}
+
+.avw-chat-header-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.avw-text-only-badge {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  color: var(--avw-text-muted);
+  background: var(--avw-bg-tertiary);
+  padding: 2px 8px;
+  border-radius: var(--avw-radius-sm);
+}
+
+.avw-close-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: var(--avw-radius-sm);
+  border: none;
+  background: transparent;
+  color: var(--avw-text-secondary);
+  cursor: pointer;
+  transition: background var(--avw-transition), color var(--avw-transition);
+}
+
+.avw-close-btn:hover {
+  background: var(--avw-bg-hover);
+  color: var(--avw-text-primary);
+}
+
+/* State badge */
+.avw-state-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--avw-text-secondary);
+}
+
+.avw-state-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  display: inline-block;
+}
+
+.avw-state-badge-listening .avw-state-dot {
+  animation: avw-pulse 1.8s ease-out infinite;
+}
+
+.avw-state-badge-speaking .avw-state-dot {
+  animation: avw-pulse 0.8s ease-out infinite;
+}
+
+/* Visualizer area */
+.avw-visualizer-area {
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--avw-border);
+  background: var(--avw-bg-secondary);
+  flex-shrink: 0;
+}
+
+.avw-interrupt-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 8px;
+  padding: 6px 12px;
+  border: 1px solid var(--avw-border);
+  border-radius: var(--avw-radius-sm);
+  background: var(--avw-bg-tertiary);
+  color: var(--avw-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  transition: background var(--avw-transition);
+}
+
+.avw-interrupt-btn:hover {
+  background: var(--avw-bg-hover);
+  color: var(--avw-text-primary);
+}
+
+/* Messages container */
+.avw-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 12px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  scroll-behavior: smooth;
+}
+
+.avw-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.avw-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.avw-messages::-webkit-scrollbar-thumb {
+  background: var(--avw-border);
+  border-radius: 4px;
+}
+
+/* Empty state */
+.avw-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  text-align: center;
+  flex: 1;
+}
+
+.avw-empty-icon {
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.avw-empty-text {
+  margin: 0;
+  color: var(--avw-text-muted);
+  font-size: 13px;
+}
+
+/* Message bubbles */
+.avw-message {
+  display: flex;
+  max-width: 85%;
+  animation: avw-msg-in 200ms ease;
+}
+
+@keyframes avw-msg-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.avw-message-user {
+  align-self: flex-end;
+}
+
+.avw-message-agent {
+  align-self: flex-start;
+}
+
+.avw-message-system {
+  align-self: center;
+  max-width: 100%;
+}
+
+.avw-message-bubble {
+  padding: 8px 12px;
+  border-radius: var(--avw-radius-md);
+  font-size: 13px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+
+.avw-message-user .avw-message-bubble {
+  background: var(--avw-brand);
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.avw-message-agent .avw-message-bubble {
+  background: var(--avw-bg-tertiary);
+  color: var(--avw-text-primary);
+  border-bottom-left-radius: 4px;
+}
+
+.avw-message-system .avw-message-bubble {
+  background: var(--avw-bg-secondary);
+  color: var(--avw-text-muted);
+  font-size: 12px;
+  font-style: italic;
+  text-align: center;
+}
+
+.avw-message-bubble p {
+  margin: 0;
+}
+
+.avw-message-time {
+  display: block;
+  font-size: 10px;
+  color: var(--avw-text-muted);
+  margin-top: 3px;
+  opacity: 0.7;
+}
+
+.avw-message-user .avw-message-time {
+  color: rgba(255, 255, 255, 0.6);
+}
+
+/* Typing indicator */
+.avw-typing-indicator {
+  display: flex;
+  gap: 4px;
+  padding: 2px 0;
+}
+
+.avw-typing-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  animation: avw-typing-bounce 1.2s ease-in-out infinite;
+}
+
+.avw-typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.avw-typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
+/* Input area */
+.avw-input-area {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px;
+  border-top: 1px solid var(--avw-border);
+  background: var(--avw-bg-secondary);
+  flex-shrink: 0;
+}
+
+.avw-input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid var(--avw-border);
+  border-radius: var(--avw-radius-full);
+  background: var(--avw-bg-tertiary);
+  color: var(--avw-text-primary);
+  font-size: 13px;
+  outline: none;
+  transition: border-color var(--avw-transition);
+}
+
+.avw-input::placeholder {
+  color: var(--avw-text-muted);
+}
+
+.avw-input:focus {
+  border-color: var(--avw-brand);
+}
+
+.avw-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.avw-send-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--avw-radius-full);
+  border: none;
+  background: transparent;
+  color: var(--avw-text-muted);
+  cursor: pointer;
+  transition: color var(--avw-transition), background var(--avw-transition);
+  flex-shrink: 0;
+}
+
+.avw-send-btn:hover:not(:disabled) {
+  background: var(--avw-bg-hover);
+}
+
+.avw-send-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Audio visualizer canvas */
+.avw-audio-visualizer {
+  width: 100%;
+  display: block;
+}
+
+/* ─── Responsive ──────────────────────────────────────────────── */
+@media (max-width: 420px) {
+  .avw-widget-container {
+    right: 12px;
+    bottom: 12px;
+    left: 12px;
+  }
+
+  .avw-chat-panel {
+    width: 100%;
+    max-height: 60vh;
+    border-radius: var(--avw-radius-md);
+  }
+
+  .avw-voice-button {
+    align-self: flex-end;
+  }
+
+  .avw-position-bottom-left,
+  .avw-position-top-left {
+    align-items: flex-start;
+  }
+
+  .avw-position-bottom-left .avw-voice-button,
+  .avw-position-top-left .avw-voice-button {
+    align-self: flex-start;
+  }
+}
+
+@media (max-width: 320px) {
+  .avw-chat-panel {
+    max-height: 50vh;
+  }
+
+  .avw-chat-header {
+    padding: 10px 12px;
+  }
+
+  .avw-messages {
+    padding: 8px 12px;
+  }
+
+  .avw-message {
+    max-width: 90%;
+  }
+}
+
+/* ─── Reduced motion ──────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .avw-voice-button,
+  .avw-chat-panel,
+  .avw-pulse-ring,
+  .avw-message,
+  .avw-typing-dot,
+  .avw-state-dot,
+  .avw-speaker-ring-1,
+  .avw-speaker-ring-2 {
+    animation: none !important;
+    transition: none !important;
+  }
+}

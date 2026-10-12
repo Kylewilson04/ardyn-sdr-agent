@@ -1,0 +1,20 @@
+{
+  "name": "@ardyn-sdr/data-pipeline",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Data connectors, Docker infra, and service orchestration for Ardyn SDR",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "pg": "^8.12.0",
+    "@neondatabase/serverless": "^0.9.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "@types/pg": "^8.11.0",
+    "tsx": "^4.16.0",
+    "typescript": "^5.5.0"
+  }
+}

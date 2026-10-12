@@ -1,0 +1,72 @@
+{
+  "name": "@ardyn-sdr/email-engine",
+  "version": "0.1.0",
+  "description": "Automated email outreach engine — Postal SMTP, BullMQ sequences, reply classification, domain rotation, and template management",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./smtp-client": {
+      "import": "./dist/smtp-client.js",
+      "types": "./dist/smtp-client.d.ts"
+    },
+    "./sequence-engine": {
+      "import": "./dist/sequence-engine.js",
+      "types": "./dist/sequence-engine.d.ts"
+    },
+    "./reply-classifier": {
+      "import": "./dist/reply-classifier.js",
+      "types": "./dist/reply-classifier.d.ts"
+    },
+    "./domain-manager": {
+      "import": "./dist/domain-manager.js",
+      "types": "./dist/domain-manager.d.ts"
+    },
+    "./template-engine": {
+      "import": "./dist/template-engine.js",
+      "types": "./dist/template-engine.d.ts"
+    },
+    "./cadence-builder": {
+      "import": "./dist/cadence-builder.js",
+      "types": "./dist/cadence-builder.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "clean": "rm -rf dist",
+    "prepublishOnly": "npm run clean && npm run build"
+  },
+  "dependencies": {
+    "@ardyn-sdr/agent-core": "*",
+    "bullmq": "^5.0.0",
+    "cheerio": "^1.0.0",
+    "html-to-text": "^9.0.0",
+    "ioredis": "^5.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "^5.6.0",
+    "vitest": "^2.1.0"
+  },
+  "keywords": [
+    "email",
+    "sdr",
+    "outreach",
+    "smtp",
+    "postal",
+    "sales-engagement"
+  ],
+  "license": "MIT",
+  "author": "Ardyn Intelligence"
+}

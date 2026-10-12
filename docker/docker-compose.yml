@@ -1,0 +1,128 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL + pgvector ──────────────────────────────────────────
+  postgres:
+    image: pgvector/pgvector:pg16
+    container_name: ardyn-sdr-db
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-ardyn}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-ardyn_dev}
+      POSTGRES_DB: ${POSTGRES_DB:-ardyn_sdr}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-ardyn} -d ${POSTGRES_DB:-ardyn_sdr}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ── Redis (BullMQ queue) ───────────────────────────────────────────
+  redis:
+    image: redis:7-alpine
+    container_name: ardyn-sdr-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redisdata:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # ── Postal (SMTP server for outbound email) ────────────────────────
+  postal:
+    image: ghcr.io/postalserver/postal:latest
+    container_name: ardyn-sdr-postal
+    ports:
+      - "5000:5000"      # Web UI
+      - "25:25"          # SMTP
+      - "2525:2525"      # Alternate SMTP (dev)
+    environment:
+      POSTAL_DATABASE_HOST: postgres
+      POSTAL_DATABASE_NAME: ${POSTGRES_DB:-ardyn_sdr}
+      POSTAL_DATABASE_USERNAME: ${POSTGRES_USER:-ardyn}
+      POSTAL_DATABASE_PASSWORD: ${POSTGRES_PASSWORD:-ardyn_dev}
+      POSTAL_RABBITMQ_HOST: rabbitmq
+      RAILS_ENV: production
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - postal-config:/config
+      - postal-data:/opt/postal/data
+
+  # ── RabbitMQ (Postal dependency) ───────────────────────────────────
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: ardyn-sdr-rabbitmq
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-ardyn}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-ardyn_dev}
+    volumes:
+      - rabbitmqdata:/var/lib/rabbitmq
+
+  # ── LangFuse (LLM observability) ───────────────────────────────────
+  langfuse:
+    image: ghcr.io/langfuse/langfuse:latest
+    container_name: ardyn-sdr-langfuse
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://${POSTGRES_USER:-ardyn}:${POSTGRES_PASSWORD:-ardyn_dev}@postgres:5432/${POSTGRES_DB:-ardyn_sdr}_langfuse
+      NEXTAUTH_URL: http://localhost:3000
+      NEXTAUTH_SECRET: ${LANGFUSE_SECRET:-change-me-in-production}
+      SALT: ${LANGFUSE_SALT:-change-me-in-production}
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  # ── API Server ─────────────────────────────────────────────────────
+  api:
+    build:
+      context: ../apps/api
+      dockerfile: Dockerfile
+    container_name: ardyn-sdr-api
+    ports:
+      - "8000:8000"
+    environment:
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-ardyn}:${POSTGRES_PASSWORD:-ardyn_dev}@postgres:5432/${POSTGRES_DB:-ardyn_sdr}
+      REDIS_URL: redis://redis:6379
+      SMTP_HOST: postal
+      SMTP_PORT: "2525"
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
+      LANGFUSE_PUBLIC_KEY: ${LANGFUSE_PUBLIC_KEY:-}
+      LANGFUSE_SECRET_KEY: ${LANGFUSE_SECRET_KEY:-}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # ── Web Frontend ───────────────────────────────────────────────────
+  web:
+    build:
+      context: ../apps/web
+      dockerfile: Dockerfile
+    container_name: ardyn-sdr-web
+    ports:
+      - "3001:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://api:8000
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
+  redisdata:
+  rabbitmqdata:
+  postal-config:
+  postal-data:

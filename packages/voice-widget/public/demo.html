@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ardyn Voice Widget — Demo</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: #0a0a14;
+      color: #e4e4f0;
+      min-height: 100vh;
+    }
+    .demo-container {
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+    .demo-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .demo-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #6366f1, #a855f7, #ec4899);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .demo-header p {
+      color: #888;
+      font-size: 16px;
+    }
+    .demo-card {
+      background: #1a1a2e;
+      border: 1px solid #2a2a3c;
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .demo-card h2 {
+      font-size: 18px;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+    .demo-card p {
+      color: #a1a1b8;
+      font-size: 14px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .demo-config {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 12px;
+      margin-top: 12px;
+    }
+    .demo-config label {
+      font-size: 13px;
+      color: #a1a1b8;
+      align-self: center;
+    }
+    .demo-config input, .demo-config select {
+      padding: 8px 12px;
+      border: 1px solid #2a2a3c;
+      border-radius: 6px;
+      background: #0f0f1a;
+      color: #e4e4f0;
+      font-size: 13px;
+    }
+    .demo-config input:focus, .demo-config select:focus {
+      outline: none;
+      border-color: #6366f1;
+    }
+    .demo-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 20px;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 150ms ease;
+    }
+    .demo-btn-primary {
+      background: #6366f1;
+      color: #fff;
+    }
+    .demo-btn-primary:hover { background: #5558e8; }
+    .demo-btn-outline {
+      background: transparent;
+      border: 1px solid #2a2a3c;
+      color: #a1a1b8;
+    }
+    .demo-btn-outline:hover { border-color: #6366f1; color: #e4e4f0; }
+    .demo-btn-danger {
+      background: #ef4444;
+      color: #fff;
+    }
+    .demo-btn-danger:hover { background: #dc2626; }
+    .demo-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .demo-code {
+      background: #0f0f1a;
+      border: 1px solid #2a2a3c;
+      border-radius: 8px;
+      padding: 16px;
+      overflow-x: auto;
+      font-family: 'SF Mono', 'Fira Code', monospace;
+      font-size: 13px;
+      line-height: 1.7;
+      color: #a1a1b8;
+    }
+    .demo-code .keyword { color: #c084fc; }
+    .demo-code .string { color: #34d399; }
+    .demo-code .comment { color: #6b6b80; }
+    .demo-status {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 12px;
+      border-radius: 8px;
+      background: #0f0f1a;
+      border: 1px solid #2a2a3c;
+      margin-top: 12px;
+    }
+    .demo-status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .demo-status-dot.connected { background: #22c55e; }
+    .demo-status-dot.disconnected { background: #6b6b80; }
+    .demo-status-dot.error { background: #ef4444; }
+  </style>
+</head>
+<body>
+  <div class="demo-container">
+    <div class="demo-header">
+      <h1>Ardyn Voice Widget</h1>
+      <p>Embeddable AI SDR voice assistant — Preact + pipecat + LiveKit + Deepgram</p>
+    </div>
+
+    <!-- Quick Start -->
+    <div class="demo-card">
+      <h2>🚀 Quick Start</h2>
+      <p>The widget is loaded. Click the floating mic button in the bottom-right corner to start a voice conversation.</p>
+      <p>Or try the programmatic controls below.</p>
+    </div>
+
+    <!-- Embed Options -->
+    <div class="demo-card">
+      <h2>⚙️ Embed Configuration</h2>
+      <p>Configure widget options before mounting:</p>
+      <div class="demo-config">
+        <label>LiveKit URL</label>
+        <input type="text" id="livekitUrl" value="wss://livekit.ardyn.ai" />
+
+        <label>LiveKit Token</label>
+        <input type="text" id="livekitToken" placeholder="Paste your LiveKit token..." />
+
+        <label>Deepgram API Key</label>
+        <input type="text" id="deepgramKey" placeholder="(optional — server-side recommended)" />
+
+        <label>ElevenLabs API Key</label>
+        <input type="text" id="elevenlabsKey" placeholder="(optional — server-side recommended)" />
+
+        <label>Brand Name</label>
+        <input type="text" id="brandName" value="Ardyn" />
+
+        <label>Position</label>
+        <select id="position">
+          <option value="bottom-right">Bottom Right</option>
+          <option value="bottom-left">Bottom Left</option>
+          <option value="top-right">Top Right</option>
+          <option value="top-left">Top Left</option>
+        </select>
+
+        <label>Theme</label>
+        <select id="theme">
+          <option value="dark">Dark</option>
+          <option value="light">Light</option>
+        </select>
+
+        <label>Auto Connect</label>
+        <select id="autoConnect">
+          <option value="false">No</option>
+          <option value="true">Yes</option>
+        </select>
+
+        <label>Greeting</label>
+        <input type="text" id="greeting" value="Hey! I'm Ardyn, your AI SDR. How can I help?" />
+      </div>
+      <div class="demo-actions">
+        <button class="demo-btn demo-btn-primary" id="btnMount">Mount Widget</button>
+        <button class="demo-btn demo-btn-outline" id="btnUnmount">Unmount</button>
+        <button class="demo-btn demo-btn-outline" id="btnOpen">Open Panel</button>
+        <button class="demo-btn demo-btn-outline" id="btnClose">Close Panel</button>
+      </div>
+      <div class="demo-status" id="widgetStatus">
+        <span class="demo-status-dot disconnected"></span>
+        <span>Not mounted</span>
+      </div>
+    </div>
+
+    <!-- HTML Embed -->
+    <div class="demo-card">
+      <h2>📦 HTML Embed (data attributes)</h2>
+      <p>Alternative: add <code>data-ardyn-voice-widget</code> to any element. The widget auto-mounts on DOMContentLoaded.</p>
+      <div class="demo-code">
+<span class="comment">&lt;!-- Auto-mounting widget --&gt;</span>
+&lt;<span class="keyword">div</span>
+  <span class="keyword">data-ardyn-voice-widget</span>
+  <span class="string">data-ardyn-token</span>=<span class="string">"YOUR_LIVEKIT_TOKEN"</span>
+  <span class="string">data-ardyn-brand</span>=<span class="string">"Ardyn"</span>
+  <span class="string">data-ardyn-position</span>=<span class="string">"bottom-right"</span>
+  <span class="string">data-ardyn-auto-connect</span>=<span class="string">"true"</span>
+  <span class="string">data-ardyn-greeting</span>=<span class="string">"Hey! I'm Ardyn."</span>
+&gt;&lt;/<span class="keyword">div</span>&gt;
+      </div>
+    </div>
+
+    <!-- API Reference -->
+    <div class="demo-card">
+      <h2>🔌 Programmatic API</h2>
+      <div class="demo-code">
+<span class="comment">// ES Module</span>
+<span class="keyword">import</span> { mount, unmount } <span class="keyword">from</span> <span class="string">'@ardyn/voice-widget'</span>;
+
+<span class="keyword">const</span> api = mount(<span class="string">'#my-container'</span>, {
+  livekitToken: <span class="string">'your-token'</span>,
+  brandName: <span class="string">'MyBrand'</span>,
+  brandColor: <span class="string">'#6366f1'</span>,
+  position: <span class="string">'bottom-right'</span>,
+  theme: <span class="string">'dark'</span>,
+  greetingMessage: <span class="string">'Hello! How can I help?'</span>,
+  onStateChange: (state) => console.log(state),
+  onMessage: (msg) => console.log(msg),
+  onError: (err) => console.error(err),
+});
+
+<span class="comment">// Later...</span>
+unmount();
+      </div>
+      <div class="demo-code" style="margin-top: 12px;">
+<span class="comment">&lt;!-- Script tag (IIFE) --&gt;</span>
+&lt;<span class="keyword">script</span> <span class="string">src</span>=<span class="string">"ardyn-voice-widget.iife.js"</span>&gt;&lt;/<span class="keyword">script</span>&gt;
+&lt;<span class="keyword">script</span>&gt;
+  ArdynVoiceWidget.mount(
+    document.getElementById(<span class="string">'widget'</span>),
+    { livekitToken: <span class="string">'your-token'</span> }
+  );
+&lt;/<span class="keyword">script</span>&gt;
+      </div>
+    </div>
+
+    <!-- Features -->
+    <div class="demo-card">
+      <h2>✨ Features</h2>
+      <ul style="color: #a1a1b8; font-size: 14px; line-height: 2; padding-left: 20px;">
+        <li>Preact-based (~50KB gzipped target)</li>
+        <li>Real-time voice via Deepgram STT → ElevenLabs TTS</li>
+        <li>LiveKit WebRTC transport with pipecat pipeline</li>
+        <li>Text fallback when mic is unavailable</li>
+        <li>User interruption (tap to stop AI mid-speech)</li>
+        <li>Dark &amp; light themes</li>
+        <li>Responsive, mobile-friendly</li>
+        <li>IIFE, ES, and UMD bundles</li>
+        <li>Zero host-page conflicts (CSS namespaced, Shadow-ready)</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Try loading local build or use inline for demo -->
+  <script type="module">
+    // In production, import from the built bundle
+    // For demo purposes, show a simulated widget UI
+    console.log('[Ardyn Demo] Voice widget demo page loaded.');
+    console.log('[Ardyn Demo] Build the widget: cd packages/voice-widget && npm run build');
+    console.log('[Ardyn Demo] Then replace this script with the actual import.');
+
+    // Simulate the mount/unmount controls for demo
+    const btnMount = document.getElementById('btnMount');
+    const btnUnmount = document.getElementById('btnUnmount');
+    const btnOpen = document.getElementById('btnOpen');
+    const btnClose = document.getElementById('btnClose');
+    const statusEl = document.querySelector('.demo-status span:last-child');
+    const statusDot = document.querySelector('.demo-status-dot');
+
+    function updateStatus(state, text) {
+      statusDot.className = 'demo-status-dot ' + state;
+      if (statusEl) statusEl.textContent = text;
+    }
+
+    btnMount?.addEventListener('click', () => {
+      const token = document.getElementById('livekitToken')?.value;
+      if (!token) {
+        updateStatus('error', '⚠️ Please enter a LiveKit token first');
+        return;
+      }
+      updateStatus('connected', 'Widget mounted — click the mic button ↓');
+      console.log('[Ardyn Demo] Mount called with token:', token.substring(0, 10) + '...');
+    });
+
+    btnUnmount?.addEventListener('click', () => {
+      updateStatus('disconnected', 'Widget unmounted');
+      console.log('[Ardyn Demo] Unmount called');
+    });
+
+    btnOpen?.addEventListener('click', () => {
+      console.log('[Ardyn Demo] Open panel');
+    });
+
+    btnClose?.addEventListener('click', () => {
+      console.log('[Ardyn Demo] Close panel');
+    });
+  </script>
+</body>
+</html>

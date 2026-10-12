@@ -1,0 +1,89 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    @apply border-surface-800;
+  }
+
+  body {
+    @apply bg-surface-950 text-surface-100 antialiased;
+    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+  }
+
+  ::selection {
+    @apply bg-brand-500/30 text-surface-100;
+  }
+
+  /* Custom scrollbar */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+  }
+
+  .scrollbar-thumb-surface-700::-webkit-scrollbar-thumb {
+    background: rgb(51 65 85);
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
+  -ms-overflow-style: none;
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+}
+
+@layer components {
+  /* Prose overrides for markdown in dark mode */
+  .prose {
+    @apply text-surface-200;
+  }
+
+  .prose strong {
+    @apply text-surface-100;
+  }
+
+  .prose h1,
+  .prose h2,
+  .prose h3,
+  .prose h4 {
+    @apply text-surface-100;
+  }
+
+  .prose p {
+    @apply leading-relaxed;
+  }
+
+  .prose code {
+    @apply text-brand-300;
+  }
+
+  .prose pre {
+    @apply bg-surface-950;
+  }
+
+  .prose li {
+    @apply my-0;
+  }
+}
+
+@layer utilities {
+  .text-balance {
+    text-wrap: balance;
+  }
+}

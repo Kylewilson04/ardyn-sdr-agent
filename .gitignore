@@ -1,0 +1,16 @@
+node_modules/
+dist/
+.next/
+.env
+.env.local
+*.pyc
+__pycache__/
+.venv/
+.coverage
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+docker/volumes/
+*.log
+.DS_Store
