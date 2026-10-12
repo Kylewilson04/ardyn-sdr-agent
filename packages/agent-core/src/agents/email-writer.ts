@@ -1,4 +1,4 @@
-import type { SDRGraphState, PositioningReport } from "../state.js";
+import type { SDRGraphState, PositioningReport } from "../state";
 
 /**
  * Builds the Email Writer's system prompt.

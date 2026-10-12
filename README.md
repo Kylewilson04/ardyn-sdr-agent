@@ -42,19 +42,23 @@ Status: **v0.1.0** — Ready for development deployment.
 ### Supervisor → Agent Flow
 
 ```
-SUPERVISOR AGENT (gpt-4o)
+SUPERVISOR AGENT
     │
-    ├── Researcher Agent (gpt-4o-mini + web search)
+    ├── Researcher Agent + web search
     │   → Company research, persona identification, trigger events
     │
-    ├── Positioning Report Agent (gpt-4o-mini)
+    ├── Positioning Report Agent
     │   → Value prop → pain point mapping, objection handling
     │
-    ├── Email Writer Agent (claude-sonnet-4)
+    ├── Email Writer Agent
     │   → Personalized cold outreach (not templates — genuine research-driven)
     │
-    └── LinkedIn Writer Agent (claude-sonnet-4)
+    └── LinkedIn Writer Agent
         → Multi-step sequence: connect → engage → pitch
+
+All agents use an injected LLM interface. Default configuration targets open-weight models
+(via Ollama / vLLM / Groq) but any LangChain-compatible provider works.
+The system includes adapters for OpenAI, Anthropic, and open-weight backends.
 ```
 
 ---
@@ -63,7 +67,7 @@ SUPERVISOR AGENT (gpt-4o)
 
 ### Prerequisites
 - Node.js 22+, Python 3.12+, Docker
-- OpenAI API key, Anthropic API key
+- LLM backend — any of: Ollama (open-weight), vLLM, Groq, OpenAI, or Anthropic
 
 ### Development
 
@@ -105,7 +109,7 @@ terraform apply
 | Layer | Technology |
 |-------|-----------|
 | **Agent Framework** | LangGraph (TypeScript) |
-| **LLMs** | GPT-4o (supervisor), GPT-4o-mini (research), Claude Sonnet 4 (writing) |
+| **LLMs** | Configurable — any LangChain-compatible provider. Default: open-weight via Ollama. OpenAI/Anthropic adapters included. |
 | **Backend** | FastAPI (Python 3.12), SQLAlchemy async, pgvector |
 | **Frontend** | Next.js 14, React 18, Tailwind CSS |
 | **Database** | PostgreSQL 16 + pgvector |

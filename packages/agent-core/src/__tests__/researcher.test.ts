@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
-import { researcherAgent } from "../agents/researcher.js";
-import type { SDRGraphState } from "../state.js";
-import { MockWebSearchProvider } from "../tools/web-search.js";
+import { researcherAgent } from "../agents/researcher";
+import type { SDRGraphState } from "../state";
+import { MockWebSearchProvider } from "../tools/web-search";
 
 /**
  * Creates a minimal valid state for testing the researcher.

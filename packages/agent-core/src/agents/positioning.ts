@@ -1,4 +1,4 @@
-import type { SDRGraphState, ResearchReport } from "../state.js";
+import type { SDRGraphState, ResearchReport } from "../state";
 
 /**
  * Builds the Positioning agent's system prompt from the research report.
@@ -160,7 +160,7 @@ export async function positioningReportAgent(
       toneRecommendation: {
         style:
           (parsed.toneRecommendation as Record<string, unknown>)
-            ?.style as ToneStyle) || "conversational",
+            ?.style as ToneStyle || "conversational",
         reasoning:
           ((parsed.toneRecommendation as Record<string, unknown>)
             ?.reasoning as string) || "",

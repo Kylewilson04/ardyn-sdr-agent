@@ -1,12 +1,12 @@
 // ─── Graph Factory ────────────────────────────────────────────────────────────
-export { createSDRGraph } from "./graph.js";
-export type { SDRGraphDependencies, LLMInvoker } from "./graph.js";
+export { createSDRGraph } from "./graph";
+export type { SDRGraphDependencies, LLMInvoker } from "./graph";
 
 // ─── Agents ──────────────────────────────────────────────────────────────────
-export { researcherAgent } from "./agents/researcher.js";
-export { positioningReportAgent } from "./agents/positioning.js";
-export { emailWriterAgent } from "./agents/email-writer.js";
-export { linkedinWriterAgent } from "./agents/linkedin-writer.js";
+export { researcherAgent } from "./agents/researcher";
+export { positioningReportAgent } from "./agents/positioning";
+export { emailWriterAgent } from "./agents/email-writer";
+export { linkedinWriterAgent } from "./agents/linkedin-writer";
 
 // ─── State & Schemas ─────────────────────────────────────────────────────────
 export {
@@ -19,7 +19,7 @@ export {
   WebSearchInputSchema,
   WebSearchResultSchema,
   AgentName,
-} from "./state.js";
+} from "./state";
 
 export type {
   SDRInput,
@@ -31,13 +31,14 @@ export type {
   ResearchSourceSchema,
   WebSearchResult,
   WebSearchInput,
-  AgentName,
-} from "./state.js";
+} from "./state";
+
+// AgentName is both a Zod schema (value) and a type — the value export above covers both
 
 // ─── Tools ───────────────────────────────────────────────────────────────────
 export {
   MockWebSearchProvider,
   createWebSearchTool,
-} from "./tools/web-search.js";
+} from "./tools/web-search";
 
-export type { WebSearchProvider } from "./tools/web-search.js";
+export type { WebSearchProvider } from "./tools/web-search";

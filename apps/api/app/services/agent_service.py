@@ -49,6 +49,12 @@ class AgentService:
         """
         Research a lead: company background, pain points, personalization hooks.
         Returns structured research data.
+
+        The response always includes a `generation_source` field:
+          - "agent-core": real LLM-powered research
+          - "fallback": placeholder generated without agent-core (BLOCKED from live send)
+
+        NEVER send email using fallback-generated content.
         """
         # Try the agent-core service first
         try:
@@ -67,18 +73,24 @@ class AgentService:
                 timeout=settings.AGENT_RESEARCH_TIMEOUT_SECONDS,
             )
             response.raise_for_status()
-            return response.json()
+            result = response.json()
+            result["generation_source"] = "agent-core"
+            return result
         except httpx.ConnectError:
-            logger.warning("agent-core unavailable, using fallback research")
+            logger.warning("agent-core unavailable, using fallback research — BLOCKED for live send")
         except httpx.HTTPStatusError as exc:
             logger.error("agent-core research error: %s", exc)
             raise
 
-        # Fallback: return a structured placeholder
+        # Fallback: return a structured placeholder with explicit blocking flag
         return {
             "lead_id": str(lead_id),
+            "generation_source": "fallback",
+            "fallback_reason": "agent-core service unavailable",
+            "__DO_NOT_SEND__": True,
             "research_summary": (
-                f"Research for {company_name}: {industry or 'Unknown'} industry. "
+                f"[FALLBACK — NOT LIVE DATA] Research for {company_name}: "
+                f"{industry or 'Unknown'} industry. "
                 f"Contact: {contact_name or 'Unknown'}, {title or 'Unknown title'}."
             ),
             "company_info": {
@@ -89,11 +101,11 @@ class AgentService:
                 "competitors": [],
             },
             "key_points": [
-                f"{company_name} operates in the {industry or 'technology'} space",
-                f"Contact {contact_name or 'the prospect'} holds a {title or 'leadership'} role",
+                f"[FALLBACK] {company_name} operates in the {industry or 'technology'} space",
+                f"[FALLBACK] Contact {contact_name or 'the prospect'} holds a {title or 'leadership'} role",
             ],
             "suggested_angle": (
-                f"How {company_name} can improve their {industry or 'business'} outcomes"
+                f"[FALLBACK] How {company_name} can improve their {industry or 'business'} outcomes"
             ),
         }
 
@@ -132,7 +144,7 @@ class AgentService:
         except httpx.ConnectError:
             logger.warning("agent-core unavailable, using fallback email generation")
 
-        # Fallback: generate a simple template email
+        # Fallback: generate a simple template email — BLOCKED for live send
         company = lead_context.get("company_name", "your company")
         contact = lead_context.get("contact_name", "there")
         first_name = (contact.split()[0] if contact else "there") or "there"
@@ -173,11 +185,15 @@ class AgentService:
 
         return {
             "lead_id": str(lead_id),
-            "subject": subject_templates.get(tone, subject_templates["professional"]),
-            "body": body_templates.get(tone, body_templates["professional"]),
+            "generation_source": "fallback",
+            "fallback_reason": "agent-core service unavailable",
+            "__DO_NOT_SEND__": True,
+            "subject": f"[FALLBACK — DO NOT SEND] {subject_templates.get(tone, subject_templates['professional'])}",
+            "body": f"[FALLBACK — DO NOT SEND]\n\n{body_templates.get(tone, body_templates['professional'])}",
             "metadata": {
                 "tone": tone,
                 "generated_by": "fallback",
+                "blocked_from_live_send": True,
             },
         }
 
@@ -229,23 +245,10 @@ class AgentService:
                 "suggested_response": None,
             }
 
-        # Positive signals
-        positive_keywords = [
-            "interested",
-            "tell me more",
-            "let's talk",
-            "set up a call",
-            "schedule",
-            "sounds good",
-            "sounds great",
-            "would love to",
-            "i'd like to learn",
-            "yes",
-            "count me in",
-        ]
-        positive_count = sum(1 for kw in positive_keywords if kw in reply_lower)
-
-        # Negative signals
+        # Negative signals — MUST be checked BEFORE positive signals.
+        # A reply containing "not interested" matches BOTH "not interested"
+        # (negative) and "interested" (positive). Checking negative first
+        # and using word-boundary matching prevents false neutrals.
         negative_keywords = [
             "not interested",
             "unsubscribe",
@@ -259,21 +262,46 @@ class AgentService:
         ]
         negative_count = sum(1 for kw in negative_keywords if kw in reply_lower)
 
-        if positive_count > negative_count:
-            return {
-                "sequence_id": str(sequence_id),
-                "classification": "positive",
-                "confidence": min(0.7 + positive_count * 0.1, 0.95),
-                "reasoning": f"Found {positive_count} positive signal(s)",
-                "suggested_response": "Schedule a call — they're interested!",
-            }
-        elif negative_count > positive_count:
+        # Positive signals — use word-boundary matches to avoid
+        # "not interested" matching the bare "interested" substring
+        import re as _re
+        positive_keywords = [
+            r"\binterested\b",
+            "tell me more",
+            "let's talk",
+            "set up a call",
+            "schedule",
+            "sounds good",
+            "sounds great",
+            "would love to",
+            "i'd like to learn",
+            "count me in",
+        ]
+        # Only count "interested" if it's not preceded by "not"
+        positive_count = 0
+        for kw in positive_keywords:
+            if kw == r"\binterested\b":
+                # Check for "interested" but exclude "not interested"
+                if _re.search(r"\binterested\b", reply_lower) and "not interested" not in reply_lower:
+                    positive_count += 1
+            elif kw in reply_lower:
+                positive_count += 1
+
+        if negative_count > 0:
             return {
                 "sequence_id": str(sequence_id),
                 "classification": "negative",
                 "confidence": min(0.7 + negative_count * 0.1, 0.95),
                 "reasoning": f"Found {negative_count} negative signal(s)",
                 "suggested_response": "Mark as not interested, do not follow up.",
+            }
+        elif positive_count > 0:
+            return {
+                "sequence_id": str(sequence_id),
+                "classification": "positive",
+                "confidence": min(0.7 + positive_count * 0.1, 0.95),
+                "reasoning": f"Found {positive_count} positive signal(s)",
+                "suggested_response": "Schedule a call — they're interested!",
             }
         else:
             return {
@@ -314,9 +342,12 @@ class AgentService:
 
         return {
             "sequence_id": str(sequence_id),
+            "generation_source": "fallback",
+            "fallback_reason": "agent-core service unavailable",
+            "__DO_NOT_SEND__": True,
             "suggested_text": "",
             "confidence": 0.0,
-            "note": "agent-core not available",
+            "note": "agent-core not available — response blocked from live send",
         }
 
     async def close(self) -> None:

@@ -1,5 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
-import { MockWebSearchProvider, createWebSearchTool } from "../tools/web-search.js";
+import { MockWebSearchProvider, createWebSearchTool } from "../tools/web-search";
 
 describe("MockWebSearchProvider", () => {
   it("returns seeded results when query matches", async () => {
@@ -46,7 +46,7 @@ describe("MockWebSearchProvider", () => {
 
     expect(results).toHaveLength(3);
     expect(results[0]!.title).toContain("Stripe");
-    expect(results[0]!.snippet).toContain("[PLACEHOLDER]");
+    expect(results[0]!.snippet).toMatch(/\[PLACEHOLDER[:\]]/);
   });
 
   it("generates at most 5 fallback results", async () => {
@@ -66,7 +66,7 @@ describe("MockWebSearchProvider", () => {
       maxResults: 1,
     });
 
-    expect(results[0]!.snippet).toContain("[PLACEHOLDER]");
+    expect(results[0]!.snippet).toMatch(/\[PLACEHOLDER[:\]]/);
   });
 });
 

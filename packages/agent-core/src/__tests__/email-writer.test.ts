@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { emailWriterAgent } from "../agents/email-writer.js";
-import type { SDRGraphState } from "../state.js";
+import { emailWriterAgent } from "../agents/email-writer";
+import type { SDRGraphState } from "../state";
 
 function makeState(overrides: Partial<SDRGraphState> = {}): SDRGraphState {
   return {
@@ -69,7 +69,7 @@ describe("emailWriterAgent", () => {
           "John,\n\n" +
           "Congrats on the $50M Series B — that kind of growth puts a spotlight on every part of the engineering org, especially onboarding.\n\n" +
           "At the pace you're hiring (100 engineers planned), manual onboarding creates a linear cost that compounds every month. Companies at your stage using automated onboarding see new engineers hit full productivity 40-60% faster — which translates to weeks of saved engineering time per hire.\n\n" +
-          "We built an AI onboarding platform that integrates natively with React, Node, and Postgres — no workflow disruption, no new tools to learn. The teams we work with go from "welcome email" to "first PR merged" in under 3 days.\n\n" +
+          "We built an AI onboarding platform that integrates natively with React, Node, and Postgres — no workflow disruption, no new tools to learn. The teams we work with go from 'welcome email' to 'first PR merged' in under 3 days.\n\n" +
           "Worth 15 minutes to see if the fit makes sense? I can do Tuesday after 2pm or Thursday morning.",
         callToAction: "Worth 15 minutes? Tuesday after 2pm or Thursday morning work.",
         tone: "direct",

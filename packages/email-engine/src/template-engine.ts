@@ -91,7 +91,7 @@ const SPAM_TRIGGER_WORDS: Array<[RegExp, number]> = [
   [/\b(?:dear (?:friend|sir/madam|sir or madam))\b/i, 3],
   [/\b(?:opt[- ]?in|opt[- ]?out|unsubscribe)\b/i, -2], // Good to have!
   [/\b(?:viagra|cialis|casino|lottery|prize)\b/i, 10],
-  [/\b(?:!!!|\*\*\*)/, 2],
+  [/!!!|\*\*\*/, 2],
   [/[A-Z]{10,}/, 3], // ALL CAPS LONG STRINGS
   [/\b(?:order now|buy now|shop now|call now)\b/i, 5],
   [/\b(?:you are a winner|you've won)\b/i, 8],

@@ -228,10 +228,15 @@ function checkAutoReplyHeaders(
 
 /**
  * Check for positive interest signals.
+ * IMPORTANT: negative signals (not_interested) are checked FIRST in the pipeline
+ * (see checkNotInterestedSignals below). When both exist, negative wins.
+ * Also, the "interested" pattern here uses a negative lookbehind to avoid
+ * matching "not interested" as a false positive.
  */
 function checkInterestSignals(subject: string, body: string): PatternMatch | null {
   const combined = `${subject} ${body}`.toLowerCase();
   const interestPatterns = [
+    /(?<!not )interested\b/i,
     /(?:i am|i'm) interested/i,
     /(?:tell me|let me know) more/i,
     /(?:schedule|set up|book) (?:a |some )?time/i,
@@ -356,13 +361,14 @@ export function classifyByPatterns(
   const unsub = checkUnsubscribe(reply.bodyText);
   if (unsub) return unsub;
 
-  // 7. Interest signals
-  const interest = checkInterestSignals(reply.subject, reply.bodyText);
-  if (interest) return interest;
-
-  // 8. Not interested
+  // 7. Not interested — checked BEFORE interest to prevent
+  //    "not interested" from being a false positive on "interested"
   const notInt = checkNotInterestedSignals(reply.subject, reply.bodyText);
   if (notInt) return notInt;
+
+  // 8. Interest signals — only reached if not_interested didn't match
+  const interest = checkInterestSignals(reply.subject, reply.bodyText);
+  if (interest) return interest;
 
   // 9. Wrong person
   const wrong = checkWrongPerson(reply.subject, reply.bodyText);

@@ -46,8 +46,29 @@ class EmailService:
         reply_to: str | None = None,
         tag: str | None = None,
         message_id: str | None = None,  # for threading
+        allow_fallback: bool = False,
     ) -> dict[str, Any]:
-        """Send via Postal's send/raw API."""
+        """Send via Postal's send/raw API.
+
+        Refuses to send content marked as fallback unless
+        `allow_fallback=True` is passed explicitly.
+        """
+        # ── Guard: reject fallback content from reaching real inboxes ──
+        if not allow_fallback:
+            combined = f"{subject} {plain_body}"
+            fallback_markers = [
+                "[FALLBACK",
+                "__DO_NOT_SEND__",
+                "generation_source: fallback",
+            ]
+            for marker in fallback_markers:
+                if marker.lower() in combined.lower():
+                    raise EmailSendError(
+                        f"Refusing to send fallback-generated content. "
+                        f"Subject=['{subject[:80]}…']. "
+                        f"Fix: ensure agent-core is running, or pass allow_fallback=True for testing."
+                    )
+
         payload: dict[str, Any] = {
             "to": [to],
             "from": f"{self._from_name} <{self._from_email}>",

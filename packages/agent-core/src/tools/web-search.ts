@@ -1,7 +1,7 @@
 import type {
   WebSearchResult,
   WebSearchInput,
-} from "../state.js";
+} from "../state";
 
 /**
  * Interface for web search providers.

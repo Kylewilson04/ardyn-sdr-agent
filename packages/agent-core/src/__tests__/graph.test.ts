@@ -1,8 +1,8 @@
 import { describe, it, expect } from "vitest";
-import { createSDRGraph } from "../graph.js";
-import type { SDRGraphDependencies } from "../graph.js";
-import type { SDRGraphState } from "../state.js";
-import { MockWebSearchProvider } from "../tools/web-search.js";
+import { createSDRGraph } from "../graph";
+import type { SDRGraphDependencies } from "../graph";
+import type { SDRGraphState } from "../state";
+import { MockWebSearchProvider } from "../tools/web-search";
 
 /**
  * Creates a mock LLM invoker that returns a set of responses in sequence.

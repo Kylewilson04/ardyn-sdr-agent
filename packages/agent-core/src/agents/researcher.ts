@@ -1,5 +1,5 @@
-import type { SDRGraphState, SDRInput } from "../state.js";
-import type { WebSearchProvider } from "../tools/web-search.js";
+import type { SDRGraphState, SDRInput } from "../state";
+import type { WebSearchProvider } from "../tools/web-search";
 
 /**
  * ResearcherPrompt builds the system prompt for the Researcher agent.

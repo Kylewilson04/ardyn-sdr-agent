@@ -1,11 +1,72 @@
-import { StateGraph, END } from "@langchain/langgraph";
-import type { SDRGraphState, AgentName } from "../state.js";
-import { SDRGraphStateSchema } from "../state.js";
-import type { WebSearchProvider } from "../tools/web-search.js";
-import { researcherAgent } from "../agents/researcher.js";
-import { positioningReportAgent } from "../agents/positioning.js";
-import { emailWriterAgent } from "../agents/email-writer.js";
-import { linkedinWriterAgent } from "../agents/linkedin-writer.js";
+import { StateGraph, END, Annotation } from "@langchain/langgraph";
+import type { SDRGraphState, AgentName, SDRInput, ResearchReport, PositioningReport, EmailOutput, LinkedInOutput } from "./state";
+import type { WebSearchProvider } from "./tools/web-search";
+import { researcherAgent } from "./agents/researcher";
+import { positioningReportAgent } from "./agents/positioning";
+import { emailWriterAgent } from "./agents/email-writer";
+import { linkedinWriterAgent } from "./agents/linkedin-writer";
+
+/**
+ * LangGraph Annotation-based state definition.
+ * Replaces Zod channels for proper input merging at runtime.
+ */
+const SDRStateAnnotation = Annotation.Root({
+  input: Annotation<Partial<SDRInput>>({
+    default: () => ({}),
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as Partial<SDRInput>,
+  }),
+  researchReport: Annotation<ResearchReport | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as ResearchReport | undefined,
+  }),
+  positioningReport: Annotation<PositioningReport | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as PositioningReport | undefined,
+  }),
+  emailDraft: Annotation<EmailOutput | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as EmailOutput | undefined,
+  }),
+  linkedinDraft: Annotation<LinkedInOutput | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as LinkedInOutput | undefined,
+  }),
+  nextAgent: Annotation<AgentName | undefined>({
+    default: () => "researcher",
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as AgentName | undefined,
+  }),
+  completedAgents: Annotation<AgentName[]>({
+    default: () => [],
+    reducer: (_prev: unknown, next: unknown) =>
+      (Array.isArray(next) ? next : _prev) as AgentName[],
+  }),
+  errors: Annotation<string[]>({
+    default: () => [],
+    reducer: (_prev: unknown, next: unknown) =>
+      (Array.isArray(next) ? next : _prev) as string[],
+  }),
+  messages: Annotation<
+    Array<{ role: string; content: string; agent?: string }>
+  >({
+    default: () => [],
+    reducer: (
+      prev: Array<{ role: string; content: string; agent?: string }>,
+      next: Array<{ role: string; content: string; agent?: string }>
+    ) => [...(prev ?? []), ...(next ?? [])],
+  }),
+  finalEmail: Annotation<EmailOutput | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as EmailOutput | undefined,
+  }),
+  finalLinkedIn: Annotation<LinkedInOutput | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as LinkedInOutput | undefined,
+  }),
+  finalPositioning: Annotation<PositioningReport | undefined>({
+    default: () => undefined,
+    reducer: (_prev: unknown, next: unknown) => (next ?? _prev) as PositioningReport | undefined,
+  }),
+});
 
 /**
  * LLM invocation interface — decouples the graph from any specific model provider.
@@ -344,9 +405,8 @@ export function createSDRGraph(deps: SDRGraphDependencies) {
   const emailWriterNode = createEmailWriterNode(deps.llmInvoker);
   const linkedinWriterNode = createLinkedInWriterNode(deps.llmInvoker);
 
-  const workflow = new StateGraph({
-    channels: SDRGraphStateSchema,
-  });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const workflow = new StateGraph(SDRStateAnnotation) as any;
 
   // Add nodes
   workflow.addNode("supervisor", supervisorNode);

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { linkedinWriterAgent } from "../agents/linkedin-writer.js";
-import type { SDRGraphState } from "../state.js";
+import { linkedinWriterAgent } from "../agents/linkedin-writer";
+import type { SDRGraphState } from "../state";
 
 function makeState(overrides: Partial<SDRGraphState> = {}): SDRGraphState {
   return {

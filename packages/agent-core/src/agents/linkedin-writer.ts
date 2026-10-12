@@ -1,4 +1,4 @@
-import type { SDRGraphState, PositioningReport } from "../state.js";
+import type { SDRGraphState, PositioningReport } from "../state";
 
 /**
  * LinkedIn is a different medium: shorter, punchier, social-proof forward.

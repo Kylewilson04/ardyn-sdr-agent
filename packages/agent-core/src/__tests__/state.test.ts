@@ -7,7 +7,7 @@ import {
   LinkedInOutputSchema,
   SDRGraphStateSchema,
   AgentName,
-} from "../state.js";
+} from "../state";
 
 describe("SDRInputSchema", () => {
   it("accepts valid minimal input", () => {

@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { positioningReportAgent } from "../agents/positioning.js";
-import type { SDRGraphState } from "../state.js";
+import { positioningReportAgent } from "../agents/positioning";
+import type { SDRGraphState } from "../state";
 
 function makeState(overrides: Partial<SDRGraphState> = {}): SDRGraphState {
   return {
